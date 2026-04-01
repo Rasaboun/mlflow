@@ -215,11 +215,13 @@ def save_model(
     if metadata is not None:
         mlflow_model.metadata = metadata
 
-    # Copy adapter weights
+    # Copy adapter weights — normalize single files to the standard name
+    # that load_lora_weights() expects, so inference works regardless of
+    # what the training framework named the file.
     weights_dst = path / _ADAPTER_WEIGHTS_DIR
     if adapter_path.is_file():
         weights_dst.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(adapter_path, weights_dst / adapter_path.name)
+        shutil.copy2(adapter_path, weights_dst / "pytorch_lora_weights.safetensors")
     elif adapter_path.is_dir():
         shutil.copytree(adapter_path, weights_dst)
     else:

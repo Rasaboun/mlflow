@@ -70,7 +70,7 @@ class TestSaveModel:
 
         weights_dir = model_path / "adapter_weights"
         assert weights_dir.exists()
-        assert (weights_dir / "adapter.safetensors").exists()
+        assert (weights_dir / "pytorch_lora_weights.safetensors").exists()
 
     def test_save_model_copies_adapter_weights(self, adapter_dir, model_path):
         mlflow.diffusers.save_model(
@@ -81,7 +81,20 @@ class TestSaveModel:
 
         weights_dir = model_path / "adapter_weights"
         assert weights_dir.exists()
+        # Directory copy preserves original filenames
         assert (weights_dir / "adapter.safetensors").exists()
+
+    def test_save_model_normalizes_single_file(self, adapter_file, model_path):
+        mlflow.diffusers.save_model(
+            adapter_path=str(adapter_file),
+            path=str(model_path),
+            base_model_id=BASE_MODEL_ID,
+        )
+
+        weights_dir = model_path / "adapter_weights"
+        assert weights_dir.exists()
+        # Single file is renamed to the standard name for load_lora_weights()
+        assert (weights_dir / "pytorch_lora_weights.safetensors").exists()
 
     def test_save_model_writes_adapter_config(self, adapter_dir, model_path):
         mlflow.diffusers.save_model(
